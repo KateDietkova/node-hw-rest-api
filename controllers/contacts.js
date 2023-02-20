@@ -23,7 +23,6 @@ const add = async (req, res, next) => {
 };
 
 const updateById = async (req, res, next) => {
-    console.log(Object.keys(req.body).length);
   if (Object.keys(req.body).length === 0) {
     throw HttpError(400, "missing fields");
   }
