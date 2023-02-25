@@ -6,9 +6,10 @@ const addSchema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
+      tlds: { allow: ["com", "net", "uk"] },
     })
     .required(),
+  favorite: Joi.boolean().optional(),
 });
 
 const updateSchema = Joi.object({
@@ -20,9 +21,15 @@ const updateSchema = Joi.object({
       tlds: { allow: ["com", "net"] },
     })
     .optional(),
+  favorite: Joi.boolean().optional(),
+});
+
+const updateFavorite = Joi.object({
+  favorite: Joi.boolean().required(),
 });
 
 module.exports = {
   addSchema,
   updateSchema,
+  updateFavorite,
 };
