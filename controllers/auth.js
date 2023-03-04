@@ -50,6 +50,17 @@ const getCurrent = async (req, res) => {
   res.json({ email, subscription });
 };
 
+const updateSubscription = async (req, res) => {
+    const { subscription } = req.body;
+    const { _id } = req.user;
+    const subscriptionList = ["starter", "pro", "business"];
+    if (!subscriptionList.includes(subscription)) {
+        throw HttpError(400, "This subscription type doesn't exist");
+    }
+    const user = await User.findByIdAndUpdate(_id, { subscription }, {new: true});
+    res.json(user);
+}
+
 const logout = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: "" });
@@ -61,4 +72,5 @@ module.exports = {
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
+  updateSubscription: ctrlWrapper(updateSubscription),
 };
