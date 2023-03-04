@@ -58,7 +58,10 @@ const updateSubscription = async (req, res) => {
         throw HttpError(400, "This subscription type doesn't exist");
     }
     const user = await User.findByIdAndUpdate(_id, { subscription }, {new: true});
-    res.json(user);
+    res.json({
+      email: user.email,
+      subscription: user.subscription,
+    });
 }
 
 const logout = async (req, res) => {
