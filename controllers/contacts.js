@@ -3,7 +3,8 @@ const Contact = require("../models/contact");
 const HttpError = require("../helpers/HttpError");
 
 const getAll = async (req, res, next) => {
-  const contactsList = await Contact.find();
+  const { _id: owner } = req.user;
+  const contactsList = await Contact.find({ owner });
   res.json(contactsList);
 };
 
@@ -17,10 +18,11 @@ const getById = async (req, res, next) => {
 };
 
 const add = async (req, res, next) => {
+  const { _id: owner } = req.user;
   if (!req.body.favorite) {
     req.body.favorite = false;
   }
-  const newContact = await Contact.create(req.body);
+  const newContact = await Contact.create({ ...req.body, owner });
   res.status(201).json(newContact);
 };
 
