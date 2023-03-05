@@ -4,7 +4,7 @@ const HttpError = require("../helpers/HttpError");
 
 const getAll = async (req, res, next) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 5, favorite = false } = req.query;
+  const { page = 1, limit = 5, favorite } = req.query;
   const skip = (page - 1) * limit;
 
   if (favorite === "true") {
