@@ -4,17 +4,15 @@ const HttpError = require("../helpers/HttpError");
 
 const getAll = async (req, res, next) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 5, favorite } = req.query;
+  const { page = 1, limit = 20, favorite } = req.query;
   const skip = (page - 1) * limit;
+  const filters = {owner};
+  if (favorite) filters.favorite = true;
 
-  if (favorite === "true") {
-    const contactsList = await Contact.find({ owner, favorite: true }, "", {
-      skip,
-      limit,
-    });
-    return res.json(contactsList);
-  }
-  const contactsList = await Contact.find({ owner }, "", { skip, limit });
+  const contactsList = await Contact.find(filters, "", {
+    skip,
+    limit,
+  });
   res.json(contactsList);
 };
 
