@@ -2,17 +2,29 @@ const ctrlWrapper = require("../helpers/ctrlWrapper");
 const HttpError = require("../helpers/HttpError");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs/promises");
 require("dotenv").config();
+var Jimp = require("jimp");
 
 const { SECRET_KEY } = process.env;
 
 const { User } = require("../models/user");
 
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
+
 const register = async (req, res) => {
-  const { password } = req.body;
+  const { password, email } = req.body;
 
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+
+  const avatarUrl = gravatar.url(email);
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarUrl,
+  });
 
   res.status(201).json({
     email: newUser.email,
@@ -51,18 +63,41 @@ const getCurrent = async (req, res) => {
 };
 
 const updateSubscription = async (req, res) => {
-    const { subscription } = req.body;
-    const { _id } = req.user;
-    const subscriptionList = ["starter", "pro", "business"];
-    if (!subscriptionList.includes(subscription)) {
-        throw HttpError(400, "This subscription type doesn't exist");
-    }
-    const user = await User.findByIdAndUpdate(_id, { subscription }, {new: true});
-    res.json({
-      email: user.email,
-      subscription: user.subscription,
-    });
-}
+  const { subscription } = req.body;
+  const { _id } = req.user;
+  const subscriptionList = ["starter", "pro", "business"];
+  if (!subscriptionList.includes(subscription)) {
+    throw HttpError(400, "This subscription type doesn't exist");
+  }
+  const user = await User.findByIdAndUpdate(
+    _id,
+    { subscription },
+    { new: true }
+  );
+  res.json({
+    email: user.email,
+    subscription: user.subscription,
+  });
+};
+
+const updateAvatar = async (req, res) => {
+  const { path: tempUpload, originalName } = req.file;
+  const { _id: userId } = req.user;
+  const filename = `${userId}_${originalName}`;
+  const resultUpload = path.join(avatarsDir, filename);
+
+  //resize avatar
+  await Jimp.read(tempUpload, (err, avatar) => {
+    if (err) throw err;
+    avatar.resize(250, 250).write(tempUpload); // save
+  });
+
+  await fs.rename(tempUpload, resultUpload);
+  const avatarUrl = path.join("avatars", filename);
+  await User.findByIdAndUpdate(userId, { avatarUrl });
+
+  res.json({ avatarUrl });
+};
 
 const logout = async (req, res) => {
   const { _id } = req.user;
@@ -76,4 +111,5 @@ module.exports = {
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
   updateSubscription: ctrlWrapper(updateSubscription),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
