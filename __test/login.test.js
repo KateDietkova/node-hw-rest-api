@@ -66,8 +66,3 @@ describe("test login controller", () => {
   });
 });
 
-// expect(response.body.data.user).toBeDefined();
-// expect(response.body.data.user.email).toBeDefined();
-// expect(response.body.data.user.password).toBeDefined();
-// expect(typeof response.body.data.user.email).toBe("string");
-// expect(typeof response.body.data.user.password).toBe("string");
