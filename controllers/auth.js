@@ -19,11 +19,12 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const avatarUrl = gravatar.url(email);
+  const avatarURL = gravatar.url(email);
+  console.log(avatarURL);
   const newUser = await User.create({
     ...req.body,
     password: hashPassword,
-    avatarUrl,
+    avatarURL,
   });
 
   res.status(201).json({
@@ -81,22 +82,23 @@ const updateSubscription = async (req, res) => {
 };
 
 const updateAvatar = async (req, res) => {
-  const { path: tempUpload, originalName } = req.file;
+  const { path: tempUpload, originalname } = req.file;
   const { _id: userId } = req.user;
-  const filename = `${userId}_${originalName}`;
+  const filename = `${userId}_${originalname}`;
   const resultUpload = path.join(avatarsDir, filename);
 
-  //resize avatar
-  await Jimp.read(tempUpload, (err, avatar) => {
-    if (err) throw err;
-    avatar.resize(250, 250).write(tempUpload); // save
-  });
-
   await fs.rename(tempUpload, resultUpload);
-  const avatarUrl = path.join("avatars", filename);
-  await User.findByIdAndUpdate(userId, { avatarUrl });
+  const avatarURL = path.join("avatars", filename);
 
-  res.json({ avatarUrl });
+  Jimp.read(resultUpload, (err, avatar) => {
+    if (err) throw err;
+      avatar.resize(250, 250).write(resultUpload);
+      console.log(avatar);
+  });
+  console.log(resultUpload);
+  await User.findByIdAndUpdate(userId, { avatarURL });
+
+  res.json({ avatarURL });
 };
 
 const logout = async (req, res) => {
